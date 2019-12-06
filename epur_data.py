@@ -1,16 +1,20 @@
 class EpurData:
-    def __init__ (self,twosided = False, data = [] ):
+    def __init__ (self,twosided = False, rods = [] ,nodes = []):
         self.twosided = twosided
-        self.data = data
+        self.rods = rods
+        self.nodes = nodes
 
 def LoadEpur(fileName):
     f = open(fileName,"r")
     ts = (f.readline().strip() == "True")
-    rods = int(f.readline())
-    data = []
-    for x in range(rods):
+    nrods = int(f.readline())
+    rods = []
+    for i in range(nrods):
         l = float(f.readline())
         a = float(f.readline())
-        data.append([l,a])
-    return EpurData(ts,data)
-
+        rods.append([l,a])
+    nnodes = nrods - 1 if ts else nrods
+    nodes = []
+    for i in range(nnodes):
+        nodes.append(int(f.readline()))
+    return EpurData(ts,rods,nodes)
