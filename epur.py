@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from PyQt5 import QtWidgets
 from epur_ui import Ui_MainWindow
 from epur_draw import EpurDraw

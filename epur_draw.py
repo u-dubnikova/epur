@@ -70,10 +70,27 @@ class EpurDraw(QWidget):
             rx = -rx
         for ty in [-ay, ay]:
             self.paint.drawLine(x+rx,h0,x+0.9*rx,h0+ty)
-
-
-            
-        
+    def DrawEpur(self):
+        if (self.data.a == None) or (len(self.data.a) == 0): return
+        NN = [ self.data.rods[i][1]/self.data.rods[i][0]*(self.data.a[i+1]-self.data.a[i]) for i in range(len(self.data.rods)) ]
+        maxNN = max( [ abs(x) for x in NN ] )
+        h0 = self.geometry().height()*3/10
+        hmax = self.geometry().height()/10
+        rl = sum([l[0] for l in self.data.rods])
+        w = self.geometry().width()
+        d0 = w/20
+        w*=0.9
+        self.paint.setBrush(QBrush(Qt.white,Qt.VerPattern));
+        x = d0
+        for r in zip(self.data.rods,NN):
+            print(r[1])
+            dx = r[0][0]*w/rl
+            h = abs(r[1])*hmax/maxNN
+            if r[1] < 0:
+                self.paint.drawRect(x,h0,dx,h)
+            else:
+                self.paint.drawRect(x,h0-h,dx,h)
+            x+=dx
 
     def paintEvent(self, event):
         if self.parent != None:
@@ -88,4 +105,5 @@ class EpurDraw(QWidget):
             if self.data.twosided:
                 self.DrawRight()
             self.DrawRods() 
+            self.DrawEpur()
         self.paint.end()
