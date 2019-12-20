@@ -39,9 +39,19 @@ class EpurDraw(QWidget):
         rl = sum([l[0] for l in self.data.rods])
         lmin = min([l[0] for l in self.data.rods])
 
+
         x = d0
         dh = 3*h/25
 
+        oldpen = self.paint.pen()
+        self.paint.setPen(QPen(QBrush(Qt.white),2,Qt.DashLine))
+        self.paint.drawLine(d0,0,d0,h)
+        for [l,a] in self.data.rods:
+            x += l*w1/rl
+            self.paint.drawLine(x,0,x,h)
+        self.paint.setPen(oldpen)
+
+        x = d0
         for ([l,a],s) in zip(self.data.rods[:-1],self.data.nodes):
             dx = l*w1/rl
             dy = math.sqrt(a)*dh/(2*rh_max)
@@ -70,11 +80,13 @@ class EpurDraw(QWidget):
             rx = -rx
         for ty in [-ay, ay]:
             self.paint.drawLine(x+rx,h0,x+0.9*rx,h0+ty)
+
     def DrawEpur(self):
         if (self.data.a == None) or (len(self.data.a) == 0): return
         NN = [ self.data.rods[i][1]/self.data.rods[i][0]*(self.data.a[i+1]-self.data.a[i]) for i in range(len(self.data.rods)) ]
         maxNN = max( [ abs(x) for x in NN ] )
         h0 = self.geometry().height()*3/10
+        h1 = self.geometry().height()*7/10
         hmax = self.geometry().height()/10
         rl = sum([l[0] for l in self.data.rods])
         w = self.geometry().width()
@@ -82,14 +94,31 @@ class EpurDraw(QWidget):
         w*=0.9
         self.paint.setBrush(QBrush(Qt.white,Qt.VerPattern));
         x = d0
-        for r in zip(self.data.rods,NN):
-            print(r[1])
-            dx = r[0][0]*w/rl
-            h = abs(r[1])*hmax/maxNN
-            if r[1] < 0:
+        wtmp = 0
+        ws = []
+        wmax = 0
+        for [ [lcur, acur], ncur] in zip(self.data.rods,NN):
+            wtmp += ncur*lcur/acur
+            ws.append(wtmp)
+            if abs(wtmp) > wmax:
+                wmax = abs(wtmp)
+        if wmax == 0:
+            wmax = 0.1
+        self.paint.drawLine(d0,h1,d0+w,h1)
+        wprev = 0
+        for [[lcur,acur], ncur, wcur ] in zip(self.data.rods,NN,ws):
+            dx = lcur*w/rl
+            h = abs(ncur)*hmax/maxNN
+            if ncur < 0:
                 self.paint.drawRect(x,h0,dx,h)
             else:
                 self.paint.drawRect(x,h0-h,dx,h)
+            pen = self.paint.pen()
+            self.paint.setPen(QPen(QColor("orange")))
+            self.paint.drawLine(x,h1-wprev*hmax/wmax,x+dx,h1-wcur*hmax/wmax)
+            self.paint.setPen(pen)
+            print(ncur,wcur)
+            wprev = wcur
             x+=dx
 
     def paintEvent(self, event):
