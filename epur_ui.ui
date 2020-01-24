@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>1160</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -35,12 +35,24 @@
     </property>
     <addaction name="actionLoad"/>
    </widget>
+   <widget class="QMenu" name="menu_Nsma">
+    <property name="title">
+     <string>&amp;Nsma</string>
+    </property>
+    <addaction name="actionNsma"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_Nsma"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoad">
    <property name="text">
     <string>&amp;Загрузить</string>
+   </property>
+  </action>
+  <action name="actionNsma">
+   <property name="text">
+    <string>&amp;Исходное</string>
    </property>
   </action>
  </widget>

@@ -1,3 +1,4 @@
+import copy
 def Gauss(M):
     n = len(M)
     for i in range(n):
@@ -21,34 +22,52 @@ def Gauss(M):
         for j in range(i+1,n):
             M[i][n]-=M[i][j]*M[j][n]
 class EpurData:
-    def __init__ (self,twosided = False, rods = [] ,nodes = []):
+    def __init__ (self,twosided = False, E = 1., eps_L = 0.01, s_start = 10, s_finish = 100, rods = [] ,nodes = []):
         self.twosided = twosided
         self.rods = rods
         self.nodes = nodes
-    def MakeMatrix(self):
-        nnodes = len(self.nodes) + 1 + (1 if self.twosided else 0)
-        nrods = len(self.rods)
-        print(nnodes,nrods)
-        K = [[ 0 for j in range(nnodes+1)] for k in range(nnodes)]
-        for j in range(nrods):
-            d = self.rods[j][1]/self.rods[j][0]
-            K[j][j]+=d
-            K[j][j+1]-=d
-            K[j+1][j]-=d
-            K[j+1][j+1]+=d
-        for k in range(len(self.nodes)):
-            K[k+1][nnodes] = self.nodes[k]
-        K[0][1] = 0
-        K[1][0] = 0
+        self.E = E
+        self.eps_L = eps_L
+        self.s_start = s_start
+        self.s_finish = s_finish
+        self.MakeMatrix()
+        self.rp = [0]+self.nodes
         if self.twosided:
-            K[nnodes-1][nnodes-2] = 0
-            K[nnodes-2][nnodes-1] = 0
+            self.rp+=[0]
+        self.a = self.SolveK(self.rp)
+
+    def MakeMatrix(self):
+#        nnodes = len(self.nodes) + 1 + (1 if self.twosided else 0)
+        nrods = len(self.rods)
+        nnodes = nrods + 1
+        self.K = [[ 0 for j in range(nnodes+1)] for k in range(nnodes)]
+        for j in range(nrods):
+            d = self.rods[j][1]*self.E/self.rods[j][0]
+            self.K[j][j]+=d
+            self.K[j][j+1]-=d
+            self.K[j+1][j]-=d
+            self.K[j+1][j+1]+=d
+        self.K[0][1] = 0
+        self.K[1][0] = 0
+        if self.twosided:
+            self.K[nnodes-1][nnodes-2] = 0
+            self.K[nnodes-2][nnodes-1] = 0
+
+    def SolveK(self,b):
+        nnodes = len(self.K[0])-1
+        K = copy.deepcopy(self.K)
+        for k in range(nnodes):
+            K[k][nnodes] = b[k]
         Gauss(K)
-        self.a=[ K[i][nnodes] for i in range(nnodes) ]
+        return [ K[i][nnodes] for i in range(nnodes) ]
 
 def LoadEpur(fileName):
     f = open(fileName,"r")
     ts = (f.readline().strip() == "True")
+    E = float(f.readline())
+    eps_L = float(f.readline())
+    s_start = float(f.readline())
+    s_finish = float(f.readline())
     nrods = int(f.readline())
     rods = []
     for i in range(nrods):
@@ -59,9 +78,6 @@ def LoadEpur(fileName):
     nodes = []
     for i in range(nnodes):
         nodes.append(float(f.readline()))
-    ret =  EpurData(ts,rods,nodes)
-    ret.MakeMatrix()
-    return ret
-
+    return EpurData(ts,E, eps_L, s_start, s_finish, rods,nodes)
 
 

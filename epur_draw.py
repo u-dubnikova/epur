@@ -83,7 +83,7 @@ class EpurDraw(QWidget):
 
     def DrawEpur(self):
         if (self.data.a == None) or (len(self.data.a) == 0): return
-        NN = [ self.data.rods[i][1]/self.data.rods[i][0]*(self.data.a[i+1]-self.data.a[i]) for i in range(len(self.data.rods)) ]
+        NN = [ self.data.rods[i][1]*self.data.E/self.data.rods[i][0]*(self.data.a[i+1]-self.data.a[i]) for i in range(len(self.data.rods)) ]
         maxNN = max( [ abs(x) for x in NN ] )
         h0 = self.geometry().height()*3/10
         h1 = self.geometry().height()*7/10
