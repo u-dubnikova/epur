@@ -35,6 +35,7 @@ class EpurData:
         if self.twosided:
             self.rp+=[0]
         self.a = self.SolveK(self.rp)
+        self.NN = [ self.rods[i][1]*self.E/self.rods[i][0]*(self.a[i+1]-self.a[i]) for i in range(len(self.rods)) ]
 
     def MakeMatrix(self):
 #        nnodes = len(self.nodes) + 1 + (1 if self.twosided else 0)

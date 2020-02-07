@@ -14,6 +14,9 @@ def MakeNsma(edata,F,A):
     scur = F/A;
     xi = MakeXi(edata,scur)
     return edata.eps_L*xi*edata.E*A
+
+def sign(x):
+    return 1 if x>0 else -1 if x<0 else 0
  
 def DrawNN(edata):
     NMax = 0
@@ -26,13 +29,13 @@ def DrawNN(edata):
         NCMax = int(edata.s_finish*r[1]/50)*50+100
         NMax = max(NMax,NCMax)
         x = range(0,NCMax,50)
-        y = [MakeNsma(edata,F,r[1]) for F in x ]
+        y = [MakeNsma(edata,F,r[1])*sign(edata.NN[i]) for F in x ]
         axN.plot(x,y,label='$N_{sma,'+str(i)+'}$')
     nnodes = len(edata.rp)
     x = range(0,NMax,50)
     ys = [[] for _ in range(nnodes) ]
     for F in x:
-        NSma = [ MakeNsma(edata,F,r[1]) for r in edata.rods ]
+        NSma = [ MakeNsma(edata,F,r[1])*sign(N) for (r,N) in zip(edata.rods,edata.NN) ]
         RP=[0]
         for i in range(1,len(edata.rp)-1):
             RP.append(F*edata.rp[i]-NSma[i]+NSma[i-1])
