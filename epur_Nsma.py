@@ -1,4 +1,4 @@
-from epur_data import EpurData
+from epur_data import *
 import math
 import matplotlib.pyplot as plt 
 
@@ -15,8 +15,6 @@ def MakeNsma(edata,F,A):
     xi = MakeXi(edata,scur)
     return edata.eps_L*xi*edata.E*A
 
-def sign(x):
-    return 1 if x>0 else -1 if x<0 else 0
  
 def DrawNN(edata):
     NMax = 0

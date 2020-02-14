@@ -1,4 +1,7 @@
 import copy
+
+def sign(x):
+    return 1 if x>0 else -1 if x<0 else 0
 def Gauss(M):
     n = len(M)
     for i in range(n):
@@ -34,8 +37,14 @@ class EpurData:
         self.rp = [0]+self.nodes
         if self.twosided:
             self.rp+=[0]
-        self.a = self.SolveK(self.rp)
+        self.Fmax = [0] + [int((self.s_finish*r[1]+50)/50+49.99)*50 for r in self.rods ] 
+        F2max = [ max(self.Fmax[i],self.Fmax[i+1]) for i in range(0,len(self.Fmax)-1) ] + [self.Fmax[-1]]
+        
+        rp = [ F*s for (F,s) in zip(self.Fmax,self.rp)]
+        self.a = self.SolveK(rp)
+        print('self.a=',self.a)
         self.NN = [ self.rods[i][1]*self.E/self.rods[i][0]*(self.a[i+1]-self.a[i]) for i in range(len(self.rods)) ]
+        print('self.NN=',self.NN)
 
     def MakeMatrix(self):
 #        nnodes = len(self.nodes) + 1 + (1 if self.twosided else 0)

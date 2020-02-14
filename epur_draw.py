@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from epur_data import EpurData
+from epur_data import *
 import math
 import itertools
 class EpurDraw(QWidget):
@@ -97,15 +97,33 @@ class EpurDraw(QWidget):
         ws = []
         wmax = 0
         for [ [lcur, acur], ncur] in zip(self.data.rods,self.data.NN):
-            wtmp += ncur*lcur/acur
+            wtmp += ncur*lcur/(acur*self.data.E)
             ws.append(wtmp)
-            if abs(wtmp) > wmax:
-                wmax = abs(wtmp)
-        if wmax == 0:
-            wmax = 0.1
         self.paint.drawLine(d0,h1,d0+w,h1)
         wprev = 0
-        for [[lcur,acur], ncur, wcur ] in zip(self.data.rods,self.data.NN,ws):
+        print('w(orange)=',ws)
+
+#        Fmax = max([ int((self.data.s_finish*r[1]+50)/50+49.99)*50 for r in self.data.rods ])
+#        F = [ Fmax for r in self.data.rods ] 
+#        F = [ int((self.data.s_finish*r[1]+50)/50+49.99)*50 for r in self.data.rods ]
+        F = self.data.Fmax
+        print('F=',F)
+        Nsma = [ self.data.eps_L*r[1]*self.data.E*sign(N) for (r,N) in zip(self.data.rods,self.data.NN) ]
+        RP = [0]
+        for i in range(1,len(self.data.rp)-1):
+            RP.append(F[i-1]*self.data.rp[i]-Nsma[i]+Nsma[i-1])
+        if self.data.twosided:
+            RP.append(0)
+        else:
+            RP.append(F[-1]*self.data.rp[-1]+Nsma[-1])
+        ws2 = self.data.SolveK(RP)
+        ws2.pop(0)
+        print('w2(cyan)=',ws2)
+        wmax = max([abs(w) for w in ws+ws2])
+        if wmax == 0:
+            wmax = 0.1
+        wprev2 = 0
+        for [[lcur,acur], ncur, wcur, wcur2 ] in zip(self.data.rods,self.data.NN,ws,ws2):
             dx = lcur*w/rl
             h = abs(ncur)*hmax/maxNN
             if ncur < 0:
@@ -115,9 +133,11 @@ class EpurDraw(QWidget):
             pen = self.paint.pen()
             self.paint.setPen(QPen(QColor("orange")))
             self.paint.drawLine(x,h1-wprev*hmax/wmax,x+dx,h1-wcur*hmax/wmax)
+            self.paint.setPen(QPen(QColor("cyan")))
+            self.paint.drawLine(x,h1-wprev2*hmax/wmax,x+dx,h1-wcur2*hmax/wmax)
             self.paint.setPen(pen)
-            print(ncur,wcur)
             wprev = wcur
+            wprev2 = wcur2
             x+=dx
 
     def paintEvent(self, event):
